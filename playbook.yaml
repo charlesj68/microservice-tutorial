@@ -1,0 +1,169 @@
+---
+- hosts: localhost
+  name: create and run our tutorial application stacks
+  
+  tasks:
+
+# Docker image management
+
+  - name: Create viewer image
+    command: "docker build -t viewer -f {{ playbook_dir }}/viewer/viewer.dockerfile {{ playbook_dir }}/viewer"
+
+  - name: Create Corp microservice image
+    command: "docker build -t corp -f {{ playbook_dir }}/corp/corp.dockerfile {{ playbook_dir }}/corp"
+
+  - name: Create Locations microservice image
+    command: "docker build -t locations -f {{ playbook_dir }}/locations/locations.dockerfile {{ playbook_dir }}/locations"
+
+  - name: Create Simulation driver image
+    command: "docker build -t simulator -f {{ playbook_dir }}/simulator/simulator.dockerfile {{ playbook_dir }}/simulator"
+
+# Docker "Infrastructure"
+# Create a network to talk over, and both the MySQL and Mongodb databases
+# we will use for storage.
+
+  - name: Define docker network
+    docker_network:
+      name: DockNet
+      state: present
+
+  - name: Initialize MySQL database container for Corp
+    docker_container:
+      name: mysqldb
+      image: mysql:5.7.22
+      state: started
+      networks:
+        - name: DockNet
+      ports:
+        - 3306
+      env:
+        MYSQL_ROOT_PASSWORD: a_password
+        MYSQL_DATABASE: CorpDb
+      volumes:
+        - "{{ playbook_dir }}/corp/db/initdb.d:/docker-entrypoint-initdb.d"
+    register: mysql
+
+  - name: Initialize MongoDB database container
+    docker_container:
+      name: mongodb
+      image: mongo:4.1-xenial
+      state: started
+      networks:
+        - name: DockNet
+      ports:
+        - 27017
+      env:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: example
+    register: mongodb
+
+# Discover container IP addresses of databases
+
+  - name: get MySQL container IP address
+    command: "docker inspect --format '{''{ .NetworkSettings.IPAddress }''}' mysqldb"
+    register: mysql_ip
+
+  - name: get Mongodb container IP address
+    command: "docker inspect --format '{''{ .NetworkSettings.IPAddress }''}' mongodb"
+    register: mongodb_ip
+
+# Wait for MySQL database to be listening to the world
+
+  - name: Wait for MySQL db to become available
+    wait_for:
+      host: "{{ mysql_ip.stdout }}"
+      port: 3306
+      state: started
+      delay: 5
+      connect_timeout: 15
+      timeout: 30
+    register: mysql_running
+    until: mysql_running is success
+    retries: 10
+
+# Docker container launches
+
+  - name: Start the corp service
+    docker_container:
+      name: corp
+      image: corp
+      restart_policy: always
+      networks:
+        - name: DockNet
+      ports:
+        - 5000
+      volumes:
+        - "{{ playbook_dir }}/corp/source:/srv/corp"
+    register: corp
+
+  - name: Start the locations microservice
+    docker_container:
+      name: locations
+      image: locations
+      restart_policy: always
+      networks:
+        - name: DockNet
+      ports:
+        - 5000
+      volumes:
+        - "{{ playbook_dir }}/locations/source:/srv/locations"
+    register: locations
+
+  - name: Start the viewer
+    docker_container:
+      name: viewer
+      image: viewer
+      restart_policy: always
+      networks:
+        - name: DockNet
+      ports:
+        - "5000:5000"
+      volumes:
+        - "{{ playbook_dir }}/viewer:/srv/viewer"
+    register: viewer
+
+  - name: Start the simulation driver
+    docker_container:
+      name: simulator
+      image: simulator
+      restart_policy: "no"
+      networks:
+        - name: DockNet
+    register: simulator
+
+# Discover container IP addresses of services
+
+  - name: Get Corp. service container IP address
+    command: "docker inspect --format '{''{ .NetworkSettings.IPAddress }''}' corp"
+    register: corp_ip
+
+  - name: Get Locations service container IP address
+    command: "docker inspect --format '{''{ .NetworkSettings.IPAddress }''}' locations"
+    register: locations_ip
+
+  - name: Get Viewer container IP address
+    command: "docker inspect --format '{''{ .NetworkSettings.IPAddress }''}' viewer"
+    register: viewer_ip
+
+
+# Report to the user some important things
+
+  - name: Report MySQL DB IP
+    debug:
+      msg: "Access MySQL from host at {{ mysql_ip.stdout }}"
+
+  - name: Report Mongodb IP
+    debug:
+      msg: "Access Mongodb from host at {{ mongodb_ip.stdout }}"
+
+  - name: Report Corp. service IP
+    debug:
+      msg: "Access Corp. service from host at {{ corp_ip.stdout }}"
+
+  - name: Report Locations service IP
+    debug:
+      msg: "Access Locations service from host at {{ locations_ip.stdout }}"
+
+  - name: Report Viewer URL
+    debug:
+      msg: "Access Viewer output at http://{{ viewer_ip.stdout }}:5000/"

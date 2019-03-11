@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Order Statuses</title>
+        <style>
+            .order-grid {
+                display: grid;
+                grid-column-gap: 20px;
+                grid-template-columns: auto auto auto auto;
+                text-align: center;
+            }
+            h1 {
+                text-align: center;
+            }
+            .refresh_tag {
+                text-align: center;
+            }
+        </style>
+        <script>
+            window.setTimeout(function(){
+                //refresh the page after 1 minute (60,000 miliseconds)
+                location.reload();
+            }, 60000);
+        </script>
+    </head>
+    <body>
+        <h1>Order Statuses</h1>
+        <p class=refresh_tag>Last refresh: {{ now }}</p>
+        <div class="order-grid">
+            <div class="order-column">
+                <h3>New orders</h3>
+                {% for item in new_orders %}
+                    {{ item }}<br/>
+                {% endfor %}
+            </div>
+            <div class="order-column">
+                <h3>Prepping orders</h3>
+                {% for item in prepping_orders %}
+                    {{ item }}<br/>
+                {% endfor %}
+            </div>
+            <div class="order-column">
+                <h3>Served orders</h3>
+                {% for item in served_orders %}
+                    {{ item }}<br/>
+                {% endfor %}
+            </div>
+            <div class="order-column">
+                <h3>Closed orders</h3>
+                {% for item in closed_orders %}
+                    {{ item }}<br/>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>

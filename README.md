@@ -7,7 +7,7 @@ installed to provide a working environment for this tutorial:
 1. `sudo apt-get install git`
 2. `sudo apt-get install docker.io`
    * If you just installed docker then make sure your user is a member of
-   the docker group to avoid having to prefix ever docker command invocation
+   the docker group to avoid having to prefix every docker command invocation
    with sudo: `sudo usermod -a -G docker $USER`
    * Logout and back in to get group membership change to take effect.
 3. `sudo apt-get install ansible`

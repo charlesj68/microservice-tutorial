@@ -9,7 +9,7 @@ RUN ["apk", "add", "mariadb-dev"]
 RUN pip install -r requirements.txt
 ENV FLASK_APP="corp.py"
 ENV FLASK_DEBUG=1
-# Run the python script with unbuffed output (-u)
+# Run the python script with unbuffered output (-u)
 # Without this the various print() outputs will not
 # appear in the docker logs
 EXPOSE 5000

@@ -38,7 +38,7 @@ SQL_GET_MENUS = """
 # **********
 # Helper functions
 #
-# Though not particuarlly helpful in this case, frequently repeated blocks of
+# Though not particularly helpful in this case, frequently repeated blocks of
 # code should live in their own functions. Within a REST API the action of
 # obtaining a connection to the database is just such a repeated block.
 
@@ -57,7 +57,7 @@ def connect_db():
 # Blueprints
 #
 # Using Flask Blueprints you can group related API endpoints together. In our
-# tutorial this isn't required, but it's a powerful tool for making API
+# tutorial this is not required, but it remains a powerful tool for making API
 # handlers that can grow. To learn more, see:
 # http://flask.pocoo.org/docs/1.0/blueprints/#blueprints
 

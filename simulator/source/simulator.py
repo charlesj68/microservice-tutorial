@@ -60,7 +60,7 @@ class order_service(my_rest_wrapper):
     def move_status(self, id, new_status):
         """PUT a status update for an order."""
         url = self.build_url("orders/{}/status/{}".format(id, new_status))
-        res = put(url)
+        put(url)
         # TODO What should we do in case of status update failure?
 
 
@@ -74,7 +74,7 @@ class corp_service(my_rest_wrapper):
         my_rest_wrapper.__init__(self, url, port=port)
 
     def get_menu_items(self):
-        """Retreive current menu items."""
+        """Retrieve current menu items."""
         url = self.build_url("menus/")
         res = get(url)
         if res.ok:

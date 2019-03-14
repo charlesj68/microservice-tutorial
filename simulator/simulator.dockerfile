@@ -3,9 +3,9 @@ WORKDIR /home/simulator/
 COPY source/* ./
 # We need gcc to build the numpy package
 RUN ["apk", "add", "build-base"]
-# Finally, install the remaining Python requirements
+# Install the Python requirements
 RUN pip install -r requirements.txt
-# Run the python script with unbuffed output (-u)
+# Run the python script with unbuffered output (-u)
 # Without this the various print() outputs will not
 # appear in the docker logs
-CMD  ["python", "simulator.py"]
+CMD  ["python", "-u", "simulator.py"]

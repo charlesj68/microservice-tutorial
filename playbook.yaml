@@ -1,13 +1,10 @@
 ---
 - hosts: localhost
   name: create and run our tutorial application stacks
-  
   tasks:
 
-# Docker image management
-
-  - name: Create viewer image
-    command: "docker build -t viewer -f {{ playbook_dir }}/viewer/viewer.dockerfile {{ playbook_dir }}/viewer"
+# Create the Docker images that we are managing locally (versus those we are
+# using directly from Dockerhub)
 
   - name: Create Corp microservice image
     command: "docker build -t corp -f {{ playbook_dir }}/corp/corp.dockerfile {{ playbook_dir }}/corp"
@@ -15,17 +12,23 @@
   - name: Create Locations microservice image
     command: "docker build -t locations -f {{ playbook_dir }}/locations/locations.dockerfile {{ playbook_dir }}/locations"
 
+  - name: Create viewer image
+    command: "docker build -t viewer -f {{ playbook_dir }}/viewer/viewer.dockerfile {{ playbook_dir }}/viewer"
+
   - name: Create Simulation driver image
     command: "docker build -t simulator -f {{ playbook_dir }}/simulator/simulator.dockerfile {{ playbook_dir }}/simulator"
 
-# Docker "Infrastructure"
-# Create a network to talk over, and both the MySQL and Mongodb databases
-# we will use for storage.
+# Create our Docker infrastructure -- a named network over which our containers
+# can talk
 
   - name: Define docker network
     docker_network:
       name: DockNet
       state: present
+
+# Create and initialize our database containers. These are pulled straight from
+# Dockerhub. Any initialization needed will have to be done through the
+# mechanisms that the published images support
 
   - name: Initialize MySQL database container for Corp
     docker_container:
@@ -43,7 +46,7 @@
         - "{{ playbook_dir }}/corp/db/initdb.d:/docker-entrypoint-initdb.d"
     register: mysql
 
-  - name: Initialize MongoDB database container
+  - name: Initialize MongoDB database container for Locations
     docker_container:
       name: mongodb
       image: mongo:4.1-xenial
@@ -81,7 +84,7 @@
     until: mysql_running is success
     retries: 10
 
-# Docker container launches
+# Launch Docker containers using self-hosted images
 
   - name: Start the corp service
     docker_container:
@@ -146,7 +149,7 @@
     register: viewer_ip
 
 
-# Report to the user some important things
+# Report to the user all the various IP addresses
 
   - name: Report MySQL DB IP
     debug:

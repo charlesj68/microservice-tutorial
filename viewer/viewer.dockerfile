@@ -1,8 +1,7 @@
 FROM python:3.6.7-alpine3.8
-# Since we are creating a small web server, let us home it in the /srv treee
 WORKDIR /srv/viewer/
 # Instead of copying all of the source, we only want to copy what we will need
-# to execute container build commands. In this case, thats the Python
+# to execute container build commands. In this case it is the Python
 # requirements file. The rest of our server code will be mapped in at container
 # run time
 COPY viewer/requirements.txt .
@@ -21,7 +20,5 @@ RUN pip install -r requirements.txt
 HEALTHCHECK --interval=60s --timeout=30s --start-period=20s --retries=3 CMD [ "python", "healthcheck.py" ]
 ENV FLASK_APP="viewer"
 ENV FLASK_DEBUG=1
-# EXPOSE tells the world what port(s) we are planning on communicating outward
-# over, but the actual mapping takes place at container-run time
 EXPOSE 5000
 CMD  ["python", "-u", "-m", "flask", "run", "--host=0.0.0.0"]

@@ -63,6 +63,7 @@ def connect_db():
 
 menus_api = Blueprint('menus', __name__, url_prefix='/menus')
 
+
 # This is our lone endpoint. It will return a simple list of all the menu item
 # names in the database and it will be invoked as a GET request to
 # http://FLASKHOST:PORT/menus/

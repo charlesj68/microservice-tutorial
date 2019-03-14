@@ -17,7 +17,6 @@ def create_app():
     def main_page():
         """Create home page for viewer app."""
         # Get various lists from Locations service
-        # LOCATIONS_HOST = "172.17.0.5:5000"
         LOCATIONS_HOST = "locations:5000"
         resp = get("http://{}/orders/pending".format(LOCATIONS_HOST))
         new_orders = resp.json()

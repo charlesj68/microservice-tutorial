@@ -95,8 +95,8 @@
         - name: DockNet
       ports:
         - 5000
-      volumes:
-        - "{{ playbook_dir }}/corp/source:/srv/corp"
+      #volumes:
+      #  - "{{ playbook_dir }}/corp/source:/srv/corp"
     register: corp
 
   - name: Start the locations microservice
@@ -108,8 +108,8 @@
         - name: DockNet
       ports:
         - 5000
-      volumes:
-        - "{{ playbook_dir }}/locations/source:/srv/locations"
+      #volumes:
+      #  - "{{ playbook_dir }}/locations/source:/srv/locations"
     register: locations
 
   - name: Start the viewer

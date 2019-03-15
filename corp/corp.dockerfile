@@ -1,6 +1,12 @@
 FROM python:3.6.7-alpine3.8
 WORKDIR /srv/corp/
-COPY source/requirements.txt .
+
+# If mounting the source as a volume, then we only need
+# to copy the requirements.txt; in that case uncomment next line.
+# COPY source/requirements.txt .
+# Otherwise, copy the source into the container image 
+COPY source .
+
 # We need gcc to build the mysqlclient package
 RUN ["apk", "add", "build-base"]
 # We need mariadb-dev to use the mysqlclient package
